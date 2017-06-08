@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html ng-app="knn">
+<head>
+  <meta charset="utf-8">
+  <title>Habibi Mustafa ~ K Nearest Neighbour (KNN)</title>
+  <meta name="Description" content="Data Mining - K Nearest Neighbour (KNN)">
+  <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" />
+  <link rel="stylesheet" href="css/custom.css" type="text/css" />
+  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css" />
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+</head>
+<body ng-controller="process">
+  <div class="container" style="margin-top:2em">
+    
+    <div class="row" ng-show="step==1">
+      <h3>Pengaturan</h3>
+      <div class="col-md-6">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Data Atribut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="set in dataset.header | filter:'!Kelas'">
+              <td>{{set}}</td>
+              <td>
+                <button type="button" class="btn btn-danger btn-md" ng-click="hdrem($index)">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>          
+                <input type="text" ng-model="attrib" class="form-control" placeholder="Data Atribut">
+              </td>
+              <td>
+                <button type="button" class="btn btn-success btn-md" ng-click="hdsave()">
+                  <i class="fa fa-plus"></i>
+                </button>
+              </td>          
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Data Kelas</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="set in dataset.kelas">
+              <td>{{set}}</td>
+              <td>
+                <button type="button" class="btn btn-danger btn-md" ng-click="klrem($index)">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>          
+                <input type="text" ng-model="kls" class="form-control" placeholder="Data Kelas">
+              </td>
+              <td>
+                <button type="button" class="btn btn-success btn-md" ng-click="klsave()">
+                  <i class="fa fa-plus"></i>
+                </button>
+              </td>          
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-block btn-info btn-md" ng-click="step=2">Lanjut &raquo;</button>
+    </div>
+
+    <div class="row" ng-show="step==2">
+      <h3>Dataset</h3>
+      <div class="col-md-12">
+        <table class="table">
+          <thead>
+            <tr>
+              <th width="20">No</th>
+              <th ng-repeat="set in dataset.header">{{set}}</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="rows in dataset.body">
+              <td>{{$index + 1}}</td>
+              <td ng-repeat="set in dataset.header">{{rows[$index]}}</td>
+              <td>
+                <button type="button" class="btn btn-danger btn-md" ng-click="inprem($index)">
+                  <i class="fa fa-trash-o"></i>
+                </button>
+              </td>
+            </tr>
+            <tr class="input">
+                <td>&nbsp;</td>
+                <td ng-repeat="set in dataset.header | filter:'!Kelas'">
+                  <input type="number" step="10" ng-model="inptbl[$index]" class="form-control" placeholder="{{set}}">
+                </td>
+                <td>
+                  <select ng-model="inptbl[dataset.header.length-1]" class="form-control">
+                    <option ng-repeat="kl in dataset.kelas" ng-value="kl">{{kl}}</option>
+                  </select>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-success btn-md" ng-click="inpsave()">
+                    <i class="fa fa-plus"></i>
+                  </button>
+                </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-block btn-info btn-md" ng-click="step=3">Lanjut &raquo;</button>
+    </div>
+
+    <div class="row" ng-show="step==3">
+      <div class="col-md-3">      
+        <h3>Tentukan K</h3>
+        <div class="form-group">
+          <label>Banyak K</label>
+          <input type="number" ng-model="k_num" class="form-control" placeholder="K Number">
+        </div>
+        <hr>
+        <h3>Data Baru</h3>
+        <div class="form-group" ng-repeat="set in dataset.header | filter:'!Kelas'">
+          <label>{{set}}</label>
+          <input type="number" ng-model="datanew[$index]" class="form-control" placeholder="{{set}}">
+        </div>
+        <button type="button" class="btn btn-block btn-info btn-md" ng-click="classify()">Klasifikasikan!</button>
+      </div>
+      <div class="col-md-9" ng-show="distance.ecl.length > 0">
+        <h3>Jarak Eucladian</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th width="20">No</th>
+              <th ng-repeat="set in dataset.header">{{set}}</th>
+              <th width="20">Ecl.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="rows in dataset.body | limitTo:k_num">
+              <td>{{$index + 1}}</td>
+              <td ng-repeat="set in dataset.header">{{rows[$index]}}</td>
+              <td>{{distance.ecl[$index]}}</td>
+            </tr>
+          </tbody>
+        </table>
+        Karena jarak terdekat (tekecil) adalah {{distance.min}} yaitu baris ke {{distance.idx + 1}},
+        maka kelas untuk data baru tersebut bernilai = "{{distance.kls}}"
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Libraries -->
+  <script src="js/angular.min.js"></script>
+  <script src="js/ui-bootstrap-tpls-0.11.2.min.js"></script>
+  <script src="js/angular-route.min.js"></script>
+  <script src="js/angular-animate.min.js"></script>
+
+  <!-- AngularJS custom codes -->
+  <script src="app/app.js"></script>
+
+  <!-- Some Bootstrap Helper Libraries -->
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/underscore.min.js"></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="js/ie10-viewport-bug-workaround.js"></script>
+</body>
+</html>
